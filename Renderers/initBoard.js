@@ -1,5 +1,8 @@
 const ROOT_DIV = document.getElementById("root");
-let data = null;
+
+const playerData = [{ player1: "white" }, { player2: "black" }];
+
+let whosTurn = "white";
 
 const initialState = [
   { id: "a2", color: "white", piece: "whitePawn" },
@@ -37,11 +40,11 @@ const initialState = [
 ];
 
 const findPiece = (id) => {
-  return initialState.find((piece) => piece.id == id);
+  return initialState.find((piece) => piece.id === id);
 };
+
 const square = (color, squareId) => {
   const pieceData = findPiece(squareId);
-
   return {
     color,
     squareId,
@@ -49,19 +52,18 @@ const square = (color, squareId) => {
   };
 };
 
+const squareRow = (rowId) => {
+  const squareRowData = [];
+  const char = ["a", "b", "c", "d", "e", "f", "g", "h"];
+  char.forEach((elem, index) => {
+    const color = index % 2 === rowId % 2 ? "white" : "black";
+    squareRowData.push(square(color, elem + rowId));
+  });
+  return squareRowData;
+};
+
 const initBoard = () => {
-  const squareRow = (rowId) => {
-    const squareRowData = [];
-    const char = ["a", "b", "c", "d", "e", "f", "g", "h"];
-    char.forEach((elem, index) => {
-      const color = index % 2 === rowId % 2 ? "white" : "black";
-      squareRowData.push(square(color, elem + rowId));
-    });
-
-    return squareRowData;
-  };
-
-  data = [
+  const data = [
     squareRow(8),
     squareRow(7),
     squareRow(6),
@@ -71,7 +73,7 @@ const initBoard = () => {
     squareRow(2),
     squareRow(1),
   ];
-
+  console.log(data);
   const fragment = document.createDocumentFragment();
 
   data.forEach((element) => {
@@ -93,80 +95,119 @@ const initBoard = () => {
 
   squares.forEach((square) => {
     if (square.innerText.length !== 0) {
-      square.innerHTML = `<img class="piece ${square.innerText} " id="${square.id}" src="./Assests/images/${square.innerText}.png" alt="${square.innerText}">`;
+      square.innerHTML = `<img class="piece ${square.innerText}" id="${square.id}" src="./Assests/images/${square.innerText}.png" alt="${square.innerText}">`;
       square.style.cursor = "pointer";
     }
   });
 
   let highlightedSquares = [];
-  let highlightSquareState = false;
+
   function highlightSquare(id) {
     const squareToHighlight = document.getElementById(id);
-    squareToHighlight.innerHTML = "";
-    const highlightDiv = document.createElement("div");
-    squareToHighlight.appendChild(highlightDiv);
     if (squareToHighlight) {
-      highlightSquareState = true;
-      highlightDiv.classList.add("highlight");
-      highlightedSquares.push(highlightDiv);
+      squareToHighlight.classList.add("highlight");
+      highlightedSquares.push(squareToHighlight);
     }
   }
 
   function clearHighlights() {
     highlightedSquares.forEach((square) => {
-      square.classList.remove("highlight", "highlightSelectedSqaure");
-      highlightSquareState = false;
+      square.classList.remove("highlight", "highlightSelectedSquare");
     });
     highlightedSquares = [];
   }
-  function highlightSelectedSqaure(id) {
+
+  function highlightSelectedSquare(id) {
     const squareToHighlight = document.getElementById(id);
     if (squareToHighlight) {
-      highlightSquareState = true;
-      squareToHighlight.classList.add("highlightSelectedSqaure");
+      squareToHighlight.classList.add("highlightSelectedSquare");
       highlightedSquares.push(squareToHighlight);
-    } else {
-      return 0;
     }
   }
 
-  // highlighting Feature
+  function handlePieceMovement(pieceType, currentSquareId) {
+    let possibleMoves = [];
+
+    const currentSelectedPawnState = document
+      .getElementById(currentSquareId)
+      .childNodes[0]?.className?.includes("moved");
+
+    switch (pieceType) {
+      case "whitePawn":
+        possibleMoves.push(
+          `${currentSquareId[0]}${Number(currentSquareId[1]) + 1}`
+        );
+        if (!currentSelectedPawnState) {
+          possibleMoves.push(
+            `${currentSquareId[0]}${Number(currentSquareId[1]) + 2}`
+          );
+        } 
+        
+        break;
+      // Add cases for other pieces
+    }
+    return possibleMoves;
+  }
+
+  function removeClickListeners() {
+    squares.forEach((square) => {
+      const newSquare = square.cloneNode(true);
+      square.parentNode.replaceChild(newSquare, square);
+    });
+  }
+
+  function rotateBoard() {
+    if (whosTurn === "black") {
+      ROOT_DIV.style.transform = "rotate(180deg)";
+      document.querySelectorAll(".piece").forEach((piece) => {
+        piece.style.transform = "rotate(180deg)";
+      });
+    } else {
+      ROOT_DIV.style.transform = "rotate(0deg)";
+      document.querySelectorAll(".piece").forEach((piece) => {
+        piece.style.transform = "rotate(0deg)";
+      });
+    }
+  }
+
   squares.forEach((square) => {
     square.addEventListener("click", (e) => {
-      // Clear previously highlighted squares
+      // removeClickListeners();
       clearHighlights();
-
       const squareId = square.id;
-      // console.log(
-      //   square.children[0]?.className?.includes("whitePawn")
-      // );
+      const piece = square.querySelector(".piece");
 
-      if (
-        square.children[0]?.className?.includes("whitePawn")
-         //&& highlightSelectedSqaure === false
-      ) {
-        highlightSelectedSqaure(squareId);
-        const highlightSquare1 = `${squareId[0]}${Number(squareId[1]) + 1}`;
-        const highlightSquare2 = `${squareId[0]}${Number(squareId[1]) + 2}`;
+      if (piece) {
+        const pieceType = piece.classList[1];
+        highlightSelectedSquare(squareId);
+        const possibleMoves = handlePieceMovement(pieceType, squareId);
 
-        highlightSquare(highlightSquare1);
-        highlightSquare(highlightSquare2);
-        highlightedSquares.forEach((element) => {
-          element.addEventListener("click", (e) => {
-            const parentSquareId = e.target.parentNode.id;
-            const targetSquare = document.getElementById(parentSquareId);
-            const clickedELemnet = document.getElementById(squareId);
-            if (parentSquareId != squareId) {
-              targetSquare.innerHTML = `<img class="piece" id="${parentSquareId}" src="./Assests/images/whitePawn.png" alt="whitePawn">`;
-              clickedELemnet.innerHTML = "";
+        possibleMoves?.forEach((move) => highlightSquare(move));
+
+        highlightedSquares.forEach((highlightedSquare) => {
+          highlightedSquare.addEventListener("click", (e) => {
+            const targetSquare = e.currentTarget;
+            const targetSquareId = targetSquare.id;
+            let currentSelectedPiece = null;
+            const selectedPiece = document.querySelector(`#${squareId} .piece`);
+            currentSelectedPiece = selectedPiece;
+
+            if (currentSelectedPiece != null) {
+              targetSquare.innerHTML = "";
+              targetSquare.appendChild(currentSelectedPiece);
+              clearHighlights();
+              currentSelectedPiece.classList.add("moved");
+              currentSelectedPiece = null;
+              //   whosTurn = whosTurn === "white" ? "black" : "white";
+              //   // rotateBoard();
             }
           });
         });
-      } else {
-        clearHighlights();
       }
     });
   });
+
+  // rotateBoard();
 };
 
-export { initBoard, data };
+export { initBoard };

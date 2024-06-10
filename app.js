@@ -1,3 +1,3 @@
-import { data, initBoard } from "./Renderers/initBoard.js";
+import { initBoard } from "./Renderers/initBoard.js";
 
 initBoard();
