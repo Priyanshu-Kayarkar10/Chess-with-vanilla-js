@@ -1,53 +1,58 @@
 body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #282c34;
-    color: white;
-    font-family: Arial, sans-serif;
-  }
-  
-  .squareParentDiv {
-    display: flex;
-    flex-direction: row;
-  }
-  /* #root{
-    rotate: 180deg;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #282c34;
+  color: white;
+  font-family: Arial, sans-serif;
 }
-.piece{
-      rotate: 180deg;
 
-  } */
-  .square {
-    width: 60px;
-    height: 60px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 1px solid #000;
-  }
-  
-  .white {
-    background-color: white;
-  }
-  
-  .black {
-    background-color: gray;
-  }
-  
-  .highlight {
-    
-    background-color: green !important;
-  }
-  
-  .highlightSelectedSquare {
-    background-color: yellow !important;
-  }
-  
-  .piece {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
+.squareParentDiv {
+  display: flex;
+  flex-direction: row;
+}
+
+#root {
+  color: transparent;
+
+  transition: transform 0.5s ease-in-out;
+
+}
+
+.piece {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease-in-out;
+}
+
+.square {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #000;
+}
+
+.white {
+  background-color: white;
+}
+
+.black {
+  background-color: gray;
+}
+
+.highlight {
+
+  background-color: green !important;
+}
+
+.highlightSelectedSquare {
+  background-color: yellow !important;
+}
+
+.danger {
+  background-color: red;
+}
